@@ -23,20 +23,10 @@ a = f.add_subplot(111)#111 means on chart
 
 
 
-print(symbol_data)
+
 
 def animate(i):#creates the function to pull data from a chart and allows the graph tp update
-    my_share = share.Share('MSFT')
-    symbol_data = None
-    try:
-        symbol_data = my_share.get_historical(share.PERIOD_TYPE_DAY,
-                                              10,
-                                              share.FREQUENCY_TYPE_MINUTE,
-                                              5)
-    except YahooFinanceError as e:
-        print(e.message)
-        sys.exit(1)
-    
+
     dataLink = 'https://api.btcmarkets.net/market/BTC/AUD/trades?limit=100'#the scripts after the ? is a parameter to add aditional parameters seperate them with  &
     data = urllib.request.urlopen(dataLink)
     data = data.readline().decode("utf-8")#decodes the data from bytes
