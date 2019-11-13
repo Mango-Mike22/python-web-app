@@ -10,18 +10,58 @@ import tkinter as tk
 from tkinter import ttk#css for tkinter
 import urllib
 import json
+from pandas.plotting import register_matplotlib_converters
 import pandas as pd
 import numpy as np
-
+import sys
+from yahoo_finance_api2 import share
+from yahoo_finance_api2.exceptions import YahooFinanceError
 LARGE_FONT = ("Verdana", 12)
 style.use("ggplot")#change the style of the graph addes lines to the graph Options are ("dark_background", "grayscale","ggplot")
-f = Figure(figsize=(5,5), dpi=100)
+f = Figure(figsize=(10,6), dpi=100)
 a = f.add_subplot(111)#111 means on chart
 
+
+
+print(symbol_data)
+
 def animate(i):#creates the function to pull data from a chart and allows the graph tp update
+    my_share = share.Share('MSFT')
+    symbol_data = None
+    try:
+        symbol_data = my_share.get_historical(share.PERIOD_TYPE_DAY,
+                                              10,
+                                              share.FREQUENCY_TYPE_MINUTE,
+                                              5)
+    except YahooFinanceError as e:
+        print(e.message)
+        sys.exit(1)
+    
+    dataLink = 'https://api.btcmarkets.net/market/BTC/AUD/trades?limit=100'#the scripts after the ? is a parameter to add aditional parameters seperate them with  &
+    data = urllib.request.urlopen(dataLink)
+    data = data.readline().decode("utf-8")#decodes the data from bytes
+    data = json.loads(data)
+
+    #data = data["btc_usd"]
+    data = pd.DataFrame(data)#data is now a panda data set
+    buys = data#[(data['type']=="bid")]
+    buys["datastamp"] = np.array(buys["date"]).astype("datetime64[s]")
+    buyDates = (buys["datastamp"]).tolist()
+
+    #sells = data[(data['type']=="ask")]
+    #sells["datastamp"] = np.array(sells["date"]).astype("datetime64[s]")
+    #sellDates = (sells["datastamp"]).tolist()
+
+    a.clear()
+
+    a.plot_date(buyDates,buys["price"],"g",label ="buys")
+
+    title = "Flag Ship Chart"
+    a.set_title(title)
+
 
 class FlagShipApp(tk.Tk):
-    #adding the bass page
+    #adding the bass pagetk.property
     def __init__(self,*args,**kwargs):#initializes whatever is inside this metthod. Starting method
         tk.Tk.__init__(self,*args,**kwargs)
 
